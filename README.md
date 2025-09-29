@@ -52,6 +52,9 @@ In our project, after gaining a comprehensive understanding of various machine l
 
 The observed discrepancy between the training loss and the test loss suggests the presence of overfitting in the data. Despite this, the model could still be utilized for predictions, considering its potential ability to generalize well on unseen test data, despite its exceptionally strong performance on the training data.
 
+<img width="924" height="265" alt="image" src="https://github.com/user-attachments/assets/4f63d8f5-0007-4cdd-b53a-f32ffde89e55" />
+
+
 **Thanks**
 
 
