@@ -9,6 +9,8 @@ DataSet: https://www.kaggle.com/datasets/yasserh/twitter-tweets-sentiment-datase
 The ability to analyze user sentiment through tweets and comments can provide significant value to companies during product launches. By understanding customer behavior and incorporating sentiment analysis, companies can gain insights from user feedback. This empowers them to make informed decisions, take necessary actions, and improve overall revenue by addressing customer concerns and making targeted improvements accordingly.
 
 <img width="275" height="184" alt="image" src="https://github.com/user-attachments/assets/2576f80d-0654-4da6-98c1-1aa485f9694e" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/67cd6528-2e91-4994-8925-0f610416365e" />
+
 
 ## Machine Learning & Data Science
 
