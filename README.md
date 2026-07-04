@@ -56,9 +56,15 @@ The observed discrepancy between the training loss and the test loss suggests th
 
 <img width="924" height="265" alt="image" src="https://github.com/user-attachments/assets/4f63d8f5-0007-4cdd-b53a-f32ffde89e55" />
 
+## Xquik CSV Analysis
+
+The Streamlit app can analyze saved Xquik tweet CSV exports through the batch
+upload panel. It prioritizes text columns named `text`, `tweet`, `tweet_text`,
+`full_text`, `content`, or `body`, then keeps useful metadata such as tweet ID,
+author, and creation time in the downloadable results CSV.
+
 
 **Thanks**
-
 
 
 

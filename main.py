@@ -13,6 +13,12 @@ SAMPLE_TWEETS = [
     "The service was okay, but the wait time was too long.",
     "I am so disappointed by this update.",
 ]
+XQUIK_TEXT_COLUMNS = ["text", "tweet", "tweet_text", "full_text", "content", "body"]
+XQUIK_METADATA_COLUMNS = {
+    "source_id": ["id", "tweet_id", "post_id"],
+    "author": ["author", "username", "user", "screen_name"],
+    "created_at": ["created_at", "date", "timestamp", "time"],
+}
 
 @st.cache_resource
 def load_sentiment_model() -> pipeline:
@@ -73,6 +79,40 @@ def append_history(entry: Dict[str, object]) -> None:
     st.session_state.history.insert(0, entry)
     st.session_state.history = st.session_state.history[:MAX_HISTORY]
 
+def find_matching_column(df: pd.DataFrame, candidates: List[str]) -> str | None:
+    """Return the original column name for the first case-insensitive match."""
+    lowercase_columns = {column.lower(): column for column in df.columns}
+    for candidate in candidates:
+        if candidate in lowercase_columns:
+            return lowercase_columns[candidate]
+    return None
+
+def find_text_columns(df: pd.DataFrame) -> List[str]:
+    """Prefer Xquik export text fields before falling back to text-like columns."""
+    preferred_columns = [
+        column
+        for column in (
+            find_matching_column(df, [candidate])
+            for candidate in XQUIK_TEXT_COLUMNS
+        )
+        if column is not None
+    ]
+    fallback_columns = [
+        column
+        for column in df.columns
+        if column not in preferred_columns and df[column].dtype == object
+    ]
+    return preferred_columns + fallback_columns
+
+def extract_metadata(row: pd.Series, df: pd.DataFrame) -> Dict[str, object]:
+    """Copy useful export metadata into the downloadable analysis CSV."""
+    metadata: Dict[str, object] = {}
+    for target, candidates in XQUIK_METADATA_COLUMNS.items():
+        source = find_matching_column(df, candidates)
+        if source is not None:
+            metadata[target] = row.get(source, "")
+    return metadata
+
 def render_history() -> None:
     """Display recent text sentiment checks."""
     if "history" not in st.session_state or not st.session_state.history:
@@ -86,15 +126,18 @@ def analyze_dataframe(df: pd.DataFrame, column: str, model: pipeline) -> pd.Data
     rows: List[Dict[str, object]] = []
     for _, row in df.iterrows():
         text = clean_tweet(str(row.get(column, "")))
+        result = extract_metadata(row, df)
+        result["tweet"] = text
         if not text or not has_alpha(text):
-            rows.append({"tweet": text, "label": "INVALID", "score": 0.0})
+            result.update({"label": "INVALID", "score": 0.0})
+            rows.append(result)
             continue
         prediction = analyze_sentiment(model, text)
-        rows.append({
-            "tweet": text,
+        result.update({
             "label": prediction["label"],
             "score": prediction["score"],
         })
+        rows.append(result)
     return pd.DataFrame(rows)
 
 def main() -> None:
@@ -177,9 +220,7 @@ def main() -> None:
         if uploaded_file is not None:
             try:
                 df = pd.read_csv(uploaded_file)
-                text_columns = [
-                    col for col in df.columns if df[col].dtype == object or col.lower() in ["text", "tweet", "content"]
-                ]
+                text_columns = find_text_columns(df)
                 if not text_columns:
                     st.warning("No text column detected. Please upload a CSV with a text field.")
                 else:
@@ -229,5 +270,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
